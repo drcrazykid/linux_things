@@ -1,0 +1,11 @@
+#wpa_supplicant sample file
+
+country=UK
+update_config=1
+ctrl_interface=/var/run/wpa_supplicant
+
+netowrk={
+	scan_ssid=1
+	ssid=""
+	psk=""
+}	
