@@ -1,3 +1,10 @@
+hi link DashboardHeader String
+hi link DashboardCenter Macro
+hi link DashboardShortcut PreProc
+hi link DashboardFooter Type
+
+let g:dashboard_executive ='telescope'
+
 let g:dashboard_custom_header = [
     \ '                                 ,',
     \ '                              ,   ,`|',
@@ -27,36 +34,35 @@ let g:dashboard_custom_header = [
     \ '         / `  | ,`               . -  \`.    |  / /',
     \ '        / /   | |                      `/"--. -  /\',
     \ '       | |     \ \                     /     \     |',
-    \ '       | \      | \                  .-|      |    |'
+    \ '       | \      | \                  .-|      |    |',
+    \ '',
+    \ '             [ Dashboard version : '. g:dashboard_version .' ]     ',
     \ ]
-let quote = systemlist('~/.local/share/nvim/bin/pq')
-let g:dashboard_custom_footer = quote
 
 let g:dashboard_custom_section={
-	\ 'last_session' :[' Open last session                    SPC sl '],
-	\ 'find_history' :['ﭯ Recently opened files                SPC fh '],
-    \ 'find_file'    :[' Find File                            SPC ff '],
-    \ 'find_word'    :[' Find word                            SPC fa '],
-    \ 'book_marks'   :[' Jump to book marks                   SPC fb '],
-	\ }
+	\ 'last_session' :{
+        \ 'description': ['    Open last session                       SPC sl   '],
+        \ 'command':function('dashboard#handler#last_session')},
+    \ 'find_history' :{
+        \ 'description': ['   ﭯ Recently opened files                   SPC fh   '],
+        \ 'command':function('dashboard#handler#find_history')},
+    \ 'find_file'    :{
+        \ 'description': ['    Find File                               SPC ff   '],
+        \ 'command':function('dashboard#handler#find_file')},
+    \ 'find_word'    :{
+        \ 'description': ['    Find word                               SPC fw   '],
+        \ 'command': function('dashboard#handler#find_word')},
+    \ 'book_marks'   :{
+        \ 'description': ['    Jump to book marks                      SPC fm   '],
+        \ 'command':function('dashboard#handler#book_marks')},
+    \ 'update_plugins'   :{
+        \ 'description': ['   Update Plugins                                     '],
+        \ 'command': 'lua require("plug_paq").update()'},
+    \ }
 
+let quote = systemlist("~/.local/share/nvim/bin/pq")
 
-function! BOOK_MARKS()
-	Clap marks
-endfunction
+let g:dashboard_custom_footer = quote
 
-function! FIND_FILE()
-	Clap files ++finder=rg --ignore --hidden
-endfunction
-
-function! FIND_HISTORY()
-	Clap history
-endfunction
-
-function! FIND_WORD()
-	Clap grep2
-endfunction
-
-function! LAST_SESSION()
-	SessionLoad
-endfunction
+set showtabline=0 
+autocmd WinLeave <buffer> set showtabline=2
