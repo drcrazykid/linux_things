@@ -3,6 +3,14 @@ let b:endwise_words = 'then,case,do'
 let b:endwise_pattern = '\%(^\s*\zscase\>\ze\|\zs\<\%(do\|then\)\ze\s*$\)'
 let b:endwise_syngroups = 'shConditional,shLoop,shIf,shFor,shRepeat,shCaseEsac,zshConditional,zshRepeat,zshDelimiter'
 
+function! RunMyCode()
+    if executable('zsh')
+        call Run("zsh %")
+    else
+        echom 'Zsh is not installed!'
+    endif
+endfunction
+
 function s:shellbang() abort
     let options  = [
         \ 'ash',
@@ -24,7 +32,9 @@ function s:shellbang() abort
         \ + map(copy(options), '"[".(v:key+1)."] ".v:val'))
 
     if choice >= 1 && choice <= (len(copy(options)) - 2)
-        if choice == 5
+        if choice == 2
+            set ft=bash
+        elseif choice == 5
             set ft=fish
         elseif choice == 7
             set ft=ion

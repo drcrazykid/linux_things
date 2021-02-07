@@ -1,40 +1,19 @@
-local plugins = {
-"nvim-lspconfig", -- Collection of common configurations for the Nvim LSP client.
-"lsp_extensions.nvim", -- bunch of info & extension callbacks for built-in LSP (provides inlay hints)
-"completion-nvim", -- auto completion framework that aims to provide a better completion experience with neovim's built-in LSP
-"diagnostic-nvim", -- wrapsthe diagnostics setting to make it more user friendly
--- "nvim-treesitter", -- Treesitter configurations and abstraction layer for Neovim. 
--- "completion-treesitter", -- treesitter based completion sources.
-"completion-buffers", -- completion for buffers word.
-"vim-dadbod-completion", -- completion sources for vim-dadbod
--- "completion-tags", -- Slightly improved ctags completion
-"nvim-web-devicons", -- devicons in lua
-"nvim-tree.lua", -- A File Explorer For Neovim Written In Lua
-"snippets.nvim", -- Snippets tool written in lua
-"nvim-colorizer.lua", -- high-performance color highlighter for Neovim
-"formatter.nvim", -- A format runner for neovim, written in lua
-"space-nvim-theme", -- My spacemacs inspired theme
-"plenary.nvim"
-}
+local G = require "global"
+local g =  vim.g
 
-for _, plugin in ipairs(plugins) do
-    -- Temporary work around for using lua plugins
-    vim.cmd('packadd ' .. plugin)
+-- DB UI
+g["db_ui_save_location"] = G.cache_dir .. "dadbod_queries"
+
+-- Dusk til Dawn
+if G.exists("/tmp/sway-colord/dawn") then
+  g["dusk_til_dawn_sway_colord"] = true
 end
 
-require 'plugins/lsp'
-require 'plugins/snippets'
+-- Vsnip snippet directories
+g["vsnip_snippet_dir"] = G.vim_path .. "snippets"
 
-require 'space-nvim-theme'
-vim.cmd('colorscheme space-nvim-theme')
+-- Endwise No default mapping
+g["endwise_no_mappings"] = 1
 
--- Requires termguicolors to be set
-require'colorizer'.setup {
-    '*', -- Highlight all files, but customize some others.
-    css = {
-        css = true
-    }, -- Enable all CSS features: rgb_fn, hsl_fn, names, RGB, RRGGBB
-    html = {
-        names = false
-    } -- Disable parsing "names" like Blue or Gray
-}
+-- Gutentags
+g["gutentags_cache_dir"] = G.cache_dir .. '/tags'

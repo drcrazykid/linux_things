@@ -541,6 +541,9 @@ au BufNewFile,BufRead *.stylus set ft=stylus
 " svelte
 au BufNewFile,BufRead *.svelte set ft=svelte
 
+" sway
+au BufNewFile,BufRead *config/sway/* set filetype=sh
+
 " swift
 au BufNewFile,BufRead *.swift set ft=swift
 
@@ -556,6 +559,9 @@ au BufNewFile,BufRead *.socket set ft=systemd
 au BufNewFile,BufRead *.swap set ft=systemd
 au BufNewFile,BufRead *.target set ft=systemd
 au BufNewFile,BufRead *.timer set ft=systemd
+
+" Teal
+au BufNewFile,BufRead *.tl set ft=teal
 
 " terraform
 au BufNewFile,BufRead *.tf set ft=terraform
@@ -729,11 +735,13 @@ AddShebangPattern! ion           ^#!.*\s\+ion\>
 AddShebangPattern! ion           ^#!.*[s]\?bin/ion\>
 AddShebangPattern! sh            ^#!.*[s]\?bin/sh\>    let\ b:is_sh=1|if\ exists('b:is_bash')|unlet\ b:is_bash|endif
 AddShebangPattern! sh            ^#!.*[s]\?bin/bash\>  let\ b:is_bash=1|if\ exists('b:is_sh')|unlet\ b:is_sh|endif
-AddShebangPattern! sh            ^#!.*\s\+\(ba\|c\|a\|da\|k\|pdk\|mk\|tc\)\?sh\>
+AddShebangPattern! sh            ^#!.*\s\+\(c\|a\|da\|k\|pdk\|mk\|tc\)\?sh\>
 AddShebangPattern! zsh           ^#!.*\s\+zsh\>
 AddShebangPattern! zsh           ^#!.*[s]\?bin/zsh\>
 AddShebangPattern! bats          ^#!.*\<bats\>
 AddShebangPattern! raku          ^#!.*raku
+AddShebangPattern! teal           ^#!.*\s\+tl\>
+AddShebangPattern! teal           ^#!.*[s]\?bin/tl\>
 
 augroup shebang
     au!

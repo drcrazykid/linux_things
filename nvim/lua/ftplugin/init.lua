@@ -1,1 +1,0 @@
-local ft = vim.api.nvim_buf_get_option(bufnr, 'filetype')

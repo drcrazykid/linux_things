@@ -1,224 +1,290 @@
-local M = {}
-local vim = vim
-local mapping = {}
-local rhs_options = {}
+local vim, api, fn = vim, vim.api, vim.fn
+local mappings = require('utils.map')
+local npairs = require('nvim-autopairs')
 
-function mapping:new()
-    local instance = {}
-    setmetatable(instance, self)
-    self.__index = self
-    return instance
+local nnoremap, inoremap, vnoremap, xnoremap, cnoremap, nmap, imap, vmap = mappings.nnoremap, mappings.inoremap, mappings.vnoremap, mappings.xnoremap, mappings.cnoremap, mappings.nmap, mappings.imap, mappings.vmap
+
+_G.MUtils = {}
+
+MUtils.completion_confirm=function()
+    if vim.fn.pumvisible() ~= 0  then
+        if vim.fn.complete_info()["selected"] ~= -1 then
+          vim.fn["compe#confirm"]()
+          return npairs.esc("")
+        else
+          vim.fn.nvim_select_popupmenu_item(0, false, false,{})
+          vim.fn["compe#confirm"]()
+          return npairs.esc("<c-n>")
+        end
+    else
+        return npairs.check_break_line_char()
+    end
 end
 
-function mapping:load_vim_define()
-    self.vim = {
-        -- Vim map
-        ["n|<C-x>"] = map_cr('bd!'):with_noremap(),
-        ["n|<C-s>"] = map_cu('write'):with_noremap(),
-        ["n|<C-z>"] = map_cu('undo'):with_noremap(),
-        ["n|<C-S-z>"] = map_cu('redo'):with_noremap(),
-        ["n|Y"] = map_cmd('y$'),
-        ["n|q"] = map_cu('quit'),
-        ["n|Q"] = map_cmd('q'):with_noremap(),
-        ["n|qQ"] = map_cmd('@q'):with_noremap(),
-        ["n|<Tab>"] = map_cmd('>>_'):with_noremap(),
-        ["n|<S-Tab>"] = map_cmd('<<_'):with_noremap(),
-        ["n|<C-h>"] = map_cmd('<C-w>h'):with_noremap(),
-        ["n|<C-l>"] = map_cmd('<C-w>l'):with_noremap(),
-        ["n|<C-j>"] = map_cmd('<C-w>j'):with_noremap(),
-        ["n|<C-k>"] = map_cmd('<C-w>k'):with_noremap(),
-        ["n|j"] = map_cmd('gk'):with_noremap(),
-        ["n|k"] = map_cmd('gk'):with_noremap(),
-        ["n|g"] = map_cmd('g^'):with_noremap(),
-        ["n|h"] = map_cmd('g$'):with_noremap(),
-        -- :: Start an external command with a single bang
-        ["n|!"] = map_cmd(':!'):with_noremap(), 
-        ["n|<CR>"] = map_cmd('za'):with_noremap(),
-        ["n|<S-Return>"] = map_cmd('zMzvzt'):with_noremap(),
-        -- Insert
-        ["i|<C-s>"] = map_cmd('<Esc>:w<CR>'),
-        ["i|<C-z>"] = map_cu('undo'):with_noremap(),
-        ["i|<C-S-z>"] = map_cu('redo'):with_noremap(),
-        ["i|<C-q>"] = map_cmd('<Esc>:wq<CR>'),
-        -- Visual
-        ["v|j"] = map_cmd('gk'):with_noremap(),
-        ["v|k"] = map_cmd('gk'):with_noremap(),
-        ["v|<Tab>"] = map_cmd('>gv'):with_noremap(),
-        ["v|<S-Tab>"] = map_cmd('<gv'):with_noremap(),
-        ["v|<C-s>"] = map_cu('write'):with_noremap(),
-        ["v|<C-z>"] = map_cu('undo'):with_noremap(),
-        ["v|<C-S-z>"] = map_cu('redo'):with_noremap(),
-        -- Leader
-        -- :: Splits
-        ["n|<leader>sv"] = map_cr('vsplit'):with_noremap(),
-        ["n|<leader>sh"] = map_cr('split'):with_noremap(),
-        ["n|<leader>sq"] = map_cr('close'):with_noremap(),
-        -- :: Toggle
-        ["n|<leader>ts"] = map_cr('setlocal spell!'):with_noremap(),
-        ["n|<leader>tn"] = map_cr('setlocal nonumber!'):with_noremap(),
-        ["n|<leader>tl"] = map_cr('setlocal nolist!'):with_noremap(),
-        -- :: Session Management
-        ["n|<Leader>ss"] = map_cu('SessionSave'):with_noremap(),
-        ["n|<Leader>sl"] = map_cu('SessionLoad'):with_noremap(),
-
-    }
-end
-
-function mapping:load_plugin_define()
-    self.plugin = {
-        -- kyazdani42/nvim-tree.lua
-        ["n|<leader>tf"] = map_cr("LuaTreeToggle"):with_noremap():with_silent(),
-        ["n|<leader>rf"] = map_cr("LuaTreeRefresh"):with_noremap():with_silent(),
-        ["n|<leader>ff"] = map_cr("LuaTreeFindFile"):with_noremap():with_silent(),
-        -- nvim-lua/completion-nvim
-        ["i|<TAB>"] = map_cmd([[pumvisible() ? "\<C-n>" : "\<Tab>"]]):with_expr():with_silent(),
-        ["i|<S-TAB>"] = map_cmd([[pumvisible() ? "\<C-p>" : "\<S-Tab>"]]):with_noremap():with_expr():with_silent(),
-            -- Allows completions to work with plugins that also map to enter
-        ["i|''"] = map_cmd([[pumvisible() ? complete_info()["selected"] != "-1" ? "<Plug>(completion_confirm_completion)"  : "<c-e><CR>" :  "<CR>"]]):with_noremap():with_expr():with_silent(),
-        
-        -- dein
-        -- ["n|<Leader>tr"] = map_cr("call dein#recache_runtimepath()"):with_noremap():with_silent(),
-        -- ["n|<Leader>tf"] = map_cu('DashboardNewFile'):with_noremap():with_silent(),
-        -- mhinz/vim-signify
-        -- ["n|[g"] = map_cmd("<plug>(signify-next-hunk)"),
-        -- ["n|]g"] = map_cmd("<plug>(signify-prev-hunk)"),
-        -- a magic bind for regex [0-9]
-        -- ["n|<Leader>,0,9"] = "<Plug>BuffetSwitch(+)",
-        -- Plugin MarkdownPreview
-        -- ["n|<Leader>om"] = map_cu('MarkdownPreview'):with_noremap():with_silent(),
-        -- Plugin DadbodUI
-        -- ["n|<Leader>od"] = map_cr('DBUIToggle'):with_noremap():with_silent(),
-        -- Plugin Floaterm
-        -- ["n|<A-d>"] = map_cu('FloatermToggle'):with_noremap():with_silent(),
-        -- ["t|<A-d>"] = map_cu([[<C-\><C-n>:FloatermToggle<CR>]]):with_noremap():with_silent(),
-        -- ["n|<Leader>g"] = map_cu('FloatermNew height=0.7 width=0.8 lazygit'):with_noremap():with_silent(),
-        -- Far.vim
-        -- ["n|<Leader>fz"] = map_cr('Farf'):with_noremap():with_silent(),
-        -- ["v|<Leader>fz"] = map_cr('Farf'):with_noremap():with_silent(),
-        -- Plugin Clap
-        -- ["n|<Leader>tc"] = map_cu('Clap colors'):with_noremap():with_silent(),
-        -- ["n|<Leader>bb"] = map_cu('Clap buffers'):with_noremap():with_silent(),
-        -- ["n|<Leader>fa"] = map_cu('Clap grep'):with_noremap():with_silent(),
-        -- ["n|<Leader>fb"] = map_cu('Clap marks'):with_noremap():with_silent(),
-        -- ["n|<C-x><C-f>"] = map_cu('Clap filer'):with_noremap():with_silent(),
-        -- ["n|<Leader>ff"] = map_cu('Clap files ++finder=rg --ignore --hidden --files'):with_noremap():with_silent(),
-        -- ["n|<Leader>fg"] = map_cu('Clap gfiles'):with_noremap():with_silent(),
-        -- ["n|<Leader>fw"] = map_cu('Clap grep ++query=<Cword>'):with_noremap():with_silent(),
-        -- ["n|<Leader>fh"] = map_cu('Clap history'):with_noremap():with_silent(),
-        -- ["n|<Leader>fW"] = map_cu('Clap windows'):with_noremap():with_silent(),
-        -- ["n|<Leader>fl"] = map_cu('Clap loclist'):with_noremap():with_silent(),
-        -- ["n|<Leader>fu"] = map_cu('Clap git_diff_files'):with_noremap():with_silent(),
-        -- ["n|<Leader>fv"] = map_cu('Clap grep ++query=@visual'):with_noremap():with_silent(),
-        -- ["n|<Leader>oc"] = map_cu('Clap dotfiles'):with_noremap():with_silent(),
-        -- ["n|<Leader>s"] = map_cu('Clap gosource'):with_noremap():with_silent(),
-        -- Plugin acceleratedjk
-        -- ["n|j"] = map_cmd('<Plug>(accelerated_jk_gj)'):with_silent(),
-        -- ["n|k"] = map_cmd('<Plug>(accelerated_jk_gk)'):with_silent(),
-        -- Plugin QuickRun
-        -- ["n|<Leader>r"] = map_cr("<cmd> lua require'quickrun'.run_command()"):with_noremap():with_silent(),
-        -- Plugin Vista
-        -- ["n|<Leader>v"] = map_cu('Vista!!'):with_noremap():with_silent(),
-        -- Plugin SplitJoin
-        -- ["n|sj"] = map_cr('SplitjoinJoin'),
-        -- ["n|sk"] = map_cr('SplitjoinSplit'),
-        -- Plugin go-nvim
-        -- ["n|gcg"] = map_cr('GoAutoComment'):with_noremap():with_silent(),
-        -- Plugin vim-operator-replace
-        -- ["x|p"] = map_cmd("<Plug>(operator-replace)"),
-        -- Plugin vim-operator-surround
-        -- ["n|sa"] = map_cmd("<Plug>(operator-surround-append)"):with_silent(),
-        -- ["n|sd"] = map_cmd("<Plug>(operator-surround-delete)"):with_silent(),
-        -- ["n|sr"] = map_cmd("<Plug>(operator-surround-replace)"):with_silent()
-    };
-end
-
-function M.nvim_load_mapping(mapping)
-    for _, v in pairs(mapping) do
-        for key, value in pairs(v) do
-            local mode, keymap = key:match("([^|]*)|?(.*)")
-            if type(value) == 'table' then
-                local rhs = value.cmd
-                local options = value.options
-                vim.fn.nvim_set_keymap(mode, keymap, rhs, options)
-            elseif type(value) == 'string' then
-                local k, min, max = keymap:match("([^,]+),([^,]+),([^,]+)")
-                for i = tonumber(min), tonumber(max) do
-                    local map = (k .. "%s"):format(i)
-                    local rhs = value:gsub("+", i)
-                    vim.fn.nvim_set_keymap(mode, map, rhs, {})
-                end
-            end
+MUtils.tab=function()
+    if vim.fn.pumvisible() ~= 0  then
+        return npairs.esc("<C-n>")
+    else
+        if vim.fn["vsnip#available"](1) ~= 0 then
+            vim.fn.feedkeys(string.format('%c%c%c(vsnip-expand-or-jump)', 0x80, 253, 83))
+            return npairs.esc("")
+        else
+            return npairs.esc("<Tab>")
         end
     end
 end
 
-function rhs_options:new()
-    local instance = {
-        cmd = '',
-        options = {
-            noremap = false,
-            silent = false,
-            expr = false
-        }
-    }
-    setmetatable(instance, self)
-    self.__index = self
-    return instance
+MUtils.s_tab=function()
+    if vim.fn.pumvisible() ~= 0  then
+        return npairs.esc("<C-p>")
+    else
+        if vim.fn["vsnip#jumpable"](-1) ~= 0 then
+            vim.fn.feedkeys(string.format('%c%c%c(vsnip-jump-prev)', 0x80, 253, 83))
+            return npairs.esc("")
+        else
+            return npairs.esc("<C-h>")
+        end
+    end
 end
 
-function rhs_options:map_cmd(cmd_string)
-    self.cmd = cmd_string
-    return self
+function os.capture(cmd, raw)
+    local f = assert(io.popen(cmd, 'r'))
+    local s = assert(f:read('*a'))
+    f:close()
+    if raw then return s end
+    s = string.gsub(s, '^%s+', '')
+    s = string.gsub(s, '%s+$', '')
+    s = string.gsub(s, '[\n\r]+', ' ')
+    return s
 end
 
--- LuaTreeToggle => :LuaTreeToggle<CR>
-function rhs_options:map_cr(cmd_string)
-    self.cmd = (":%s<CR>"):format(cmd_string)
-    return self
+local function cnoreabbrev(command)
+    api.nvim_command("cnoreabbrev " .. command)
 end
 
--- LuaTreeToggle => :<C-u>LuaTreeToggle<CR>
-function rhs_options:map_cu(cmd_string)
-    self.cmd = (":<C-u>%s<CR>"):format(cmd_string)
-    return self
+local function iabbrev(command)
+    api.nvim_command("iabbrev " .. command)
 end
 
-function rhs_options:with_silent()
-    self.options.silent = true
-    return self
+-- Start an external command with a single bang
+nnoremap('!', ':!')
+
+-- Allow misspellings
+cnoreabbrev "Qa qa"
+cnoreabbrev "Q q"
+cnoreabbrev "Qall qall"
+cnoreabbrev "Q! q!"
+cnoreabbrev "Qall! qall!"
+cnoreabbrev "qQ q@"
+cnoreabbrev "Bd bd"
+cnoreabbrev "bD bd"
+cnoreabbrev "qw wq"
+cnoreabbrev "Wq wq"
+cnoreabbrev "WQ wq"
+cnoreabbrev "Wq wq"
+cnoreabbrev "Wa wa"
+cnoreabbrev "wQ wq"
+cnoreabbrev "W w"
+cnoreabbrev "W! w!"
+
+-- Abbrev
+iabbrev "btw by the way"
+iabbrev "atm at the moment"
+inoremap(";date", "<C-R>=strftime('%d %b %y')<CR>")
+
+-- Folds
+nnoremap("<CR>", "za")
+nnoremap("<S-Return>", "zMzvzt")
+
+-- Start new line from any cursor position
+inoremap("<S-Return>", "<C-o>o")
+
+-- Easier line-wise movement
+nnoremap("gh", "g^")
+nnoremap("gl", "g$")
+
+-- Yank from cursor position to end-of-line
+nnoremap('Y', 'y$')
+
+-- Window control
+nnoremap("<C-q>", "<C-w>")
+nmap("<C-x>", ":BufferClose<CR>")
+nnoremap("<C-w>z", ":vert resize<CR>:resize<CR>:normal! ze<CR>")
+
+-- switch windw
+nnoremap("<C-h>", "<C-w>h")
+nnoremap("<C-j>", "<C-w>j")
+nnoremap("<C-k>", "<C-w>k")
+nnoremap("<C-l>", "<C-w>l")
+
+-- smart move
+nnoremap("j", "gj")
+nnoremap("k", "gk")
+vnoremap("j", "gj")
+vnoremap("k", "gk")
+
+-- Select blocks after indenting
+xnoremap("<", "<gv")
+xnoremap(">", ">gv|")
+
+-- Use tab for indenting
+nnoremap("<Tab>", ">>_")
+nnoremap("<S-Tab>", "<<_")
+vnoremap("<Tab>", ">gv")
+vnoremap("<S-Tab>", "<gv")
+
+-- Exit insert mode and save just by hitting CTRL-s
+nnoremap("<C-s>", ":<C-u>write<CR>")
+vnoremap("<C-s>", ":<C-u>write<CR>")
+cnoremap("<C-s>", ":<C-u>write<CR>")
+inoremap("<C-s>", "<Esc>:write<CR>")
+
+-- I like to :quit with 'q', shrug.
+nnoremap("q", "<C-u>:quit<CR>")
+nnoremap("<C-q>", "<Esc>:wq<CR>")
+
+-- Undo / Redo
+nnoremap("<C-z>", "<C-u>:undo<CR>")
+nnoremap("<A-z>", "<C-u>:redo<CR>")
+inoremap("<C-z>", "<Esc>:undo<CR>")
+inoremap("<A-z>", "<Esc>:redo<CR>")
+vnoremap("<C-z>", "<C-u>:undo<CR>")
+vnoremap("<A-z>", "<C-u>:redo<CR>")
+
+-- :: Splits
+nnoremap("<leader>sv", ":vsplit<CR>")
+nnoremap("<leader>sh", ":split<CR>")
+nnoremap("<leader>sq", ":close<CR>")
+
+-- :: Toggle
+nnoremap("<leader>ts", "<C-u>:setlocal spell!<CR>")
+nnoremap("<leader>tn", "<C-u>:setlocal nonumber!<CR>")
+nnoremap("<leader>tl", "<C-u>:setlocal nolist!<CR>")
+-- tf toggles files
+-- tv toggles vista
+-- td toggles database
+
+-- Select entire Buffer
+nnoremap("<C-a>", ":normal maggVG<CR>")
+-- Yank entire buffer
+nnoremap("<A-a>", ":normal maggyG`a<CR>")
+
+-- :: Session Management
+nnoremap("<leader>ss", ":SessionSave<CR>")
+nnoremap("<leader>sl", ":SessionLoad<CR>")
+
+-- Switch Buffers ()
+nmap("<Leader>bd", ":BufferOrderByDirectory<CR>")
+nmap("<Leader>bl", ":BufferOrderByLanguage<CR>")
+nmap("<Leader>bp", ":BufferPrevious<CR>")
+nmap("<Leader>bn", ":BufferNext<CR>")
+nmap("<Leader>1", ":BufferGoto 1<CR>")
+nmap("<Leader>2", ":BufferGoto 2<CR>")
+nmap("<Leader>3", ":BufferGoto 3<CR>")
+nmap("<Leader>4", ":BufferGoto 4<CR>")
+nmap("<Leader>5", ":BufferGoto 5<CR>")
+nmap("<Leader>6", ":BufferGoto 6<CR>")
+nmap("<Leader>7", ":BufferGoto 7<CR>")
+nmap("<Leader>8", ":BufferGoto 8<CR>")
+nmap("<Leader>9", ":BufferLast<CR>")
+
+-- Autocompletion and snippets
+imap("<CR>", "v:lua.MUtils.completion_confirm()", {expr = true , noremap = true})
+imap("<Tab>", "v:lua.MUtils.tab()", {expr = true , noremap = true})
+imap("<S-Tab>", "v:lua.MUtils.s_tab()", {expr = true , noremap = true})
+
+--- :: Visual mode insert text around visual block
+-- Replace type  with Option<Type>
+vnoremap("<leader>mO", [[:s/\%V\(.*\)\%V/Option<\1>/ <CR> <bar> :nohlsearch<CR>]])
+-- Replace type  with Result<Type, Err>
+vnoremap("<leader>mR", [[:s/\%V\(.*\)\%V/Result<\1, Err>/ <CR> <bar> :nohlsearch<CR>]])
+-- Replace val  with Some(val)
+vnoremap("<leader>ms", [[:s/\%V\(.*\)\%V/Some(\1)/ <CR> <bar> :nohlsearch<CR>]])
+-- Replace val  with Some(val)
+vnoremap("<leader>ms", [[:s/\%V\(.*\)\%V/Some(\1)/ <CR> <bar> :nohlsearch<CR>]])
+-- Replace val  with Ok(val)
+vnoremap("<leader>mo", [[:s/\%V\(.*\)\%V/Ok(\1)/ <CR> <bar> :nohlsearch<CR>]])
+-- Replace val  with Err(val)
+vnoremap("<leader>me", [[:s/\%V\(.*\)\%V/Err(\1)/ <CR> <bar> :nohlsearch<CR>]])
+-- Replace val  with (val)
+vnoremap("<leader>m(", [[:s/\%V\(.*\)\%V/(\1)/ <CR> <bar> :nohlsearch<CR>]])
+-- Replace val  with 'val'
+vnoremap("<leader>m'", [[:s/\%V\(.*\)\%V/'\1'/ <CR> <bar> :nohlsearch<CR>]])
+-- Replace val  with "val"
+vnoremap("<leader>m\"", [[:s/\%V\(.*\)\%V/"\1"/ <CR> <bar> :nohlsearch<CR>]])
+
+-- File Tree (nvim-tree.lua)
+nnoremap("<leader>tf", "<C-u>:NvimTreeToggle<CR>")
+--nnoremap("<leader>rf", "<C-u>:NvimTreeRefresh<CR>")
+--nnoremap("<leader>sf", "<C-u>:NvimTreeFindFile<CR>")
+
+-- Plugin Vista
+nnoremap("<leader>tv", "<cmd>Vista!!<CR>")
+
+-- Vim Easy Align
+nmap("<leader>aa", [[:'<,'>EasyAlign /[+;]\+/]])
+vmap("<leader>aa", [[:'<,'>EasyAlign /[+;]\+/]])
+nmap("<leader>aA", ":'<,'>EasyAlign*&")
+vmap("<leader>aA", ":'<,'>EasyAlign*&")
+nmap("<leader>ac", ":'<,'>EasyAlign*:")
+vmap("<leader>ac", ":'<,'>EasyAlign*:")
+nmap("<leader>aC", ":'<,'>EasyAlign*,")
+vmap("<leader>aC", ":'<,'>EasyAlign*,")
+nmap("<leader>ad", [[:'<,'>EasyAlign /[\;]\+/]])
+vmap("<leader>ad", [[:'<,'>EasyAlign /[\;]\+/]])
+nmap("<leader>ae", ":'<,'>EasyAlign*=")
+vmap("<leader>ae", ":'<,'>EasyAlign*=")
+nmap("<leader>ah", ":'<,'>EasyAlign*#")
+vmap("<leader>ah", ":'<,'>EasyAlign*#")
+nmap("<leader>ai", "<Plug>(EasyAlign)")
+vmap("<leader>ai", "<Plug>(EasyAlign)")
+nmap("<leader>am", [[:'<,'>EasyAlign /[*;]\+/]])
+vmap("<leader>am", [[:'<,'>EasyAlign /[*;]\+/]])
+nmap("<leader>ap", ":'<,'>EasyAlign*.")
+vmap("<leader>ap", ":'<,'>EasyAlign*.")
+nmap("<leader>aq", ":'<,'>EasyAlign*\"")
+vmap("<leader>aq", ":'<,'>EasyAlign*=\"")
+nmap("<leader>as", [[:'<,'>EasyAlign /[-;]\+/]])
+vmap("<leader>as", [[:'<,'>EasyAlign /[-;]\+/]])
+nmap("<leader>aS", ":'<,'>EasyAlign*;")
+vmap("<leader>aS", ":'<,'>EasyAlign*;")
+
+-- Plugin DadbodUI
+nnoremap("<leader>td", ":DBUIToggle<CR>")
+
+-- Telescope
+nnoremap("<Leader>bs", "<C-u>:Telescope buffers<CR>")
+nnoremap("<Leader>fg", "<C-u>:Telescope git_files<CR>")
+nnoremap("<Leader>fs", "<C-u>:Telescope grep_string<CR>")
+nnoremap("<Leader>fl", "<C-u>:Telescope loclist<CR>")
+nnoremap("<Leader>fc", "<C-u>:Telescope git_commits<CR>")
+nnoremap("<C-p>",      "<C-u>:Telescope find_files<CR>")
+nnoremap("<Leader>fw", "<C-u>:DashboardFindWord<CR>")
+nnoremap("<Leader>fb", "<C-u>:DashboardJumpMark<CR>")
+nnoremap("<Leader>ff", "<C-u>:DashboardFindFile<CR>")
+nnoremap("<Leader>fh", "<C-u>:DashboardFindHistory<CR>")
+
+
+local name = os.capture('git config --list | grep "user.name" | cut -d "=" -f2')
+if name ~= nil then
+    inoremap(';name', name)
+
+    words = {}
+    for word in string.gmatch(name, "[^%s]+") do
+        table.insert(words, word)
+     end
+
+     if table.getn(words) == 2 then
+        inoremap(';fn', words[1])
+        inoremap(';ln', words[2])
+     elseif table.getn(words) >= 3 then
+        inoremap(';fn', words[1])
+        inoremap(';mn', words[2])
+        inoremap(';ln', words[3])
+    end
 end
 
-function rhs_options:with_noremap()
-    self.options.noremap = true
-    return self
+local email = os.capture('git config --list | grep "user.email" | cut -d "=" -f2')
+if email ~= nil then
+    inoremap(';email', email)
 end
-
-function rhs_options:with_expr()
-    self.options.expr = true
-    return self
-end
-
-function map_cr(cmd_string)
-    local ro = rhs_options:new()
-    return ro:map_cr(cmd_string)
-end
-
-function map_cmd(cmd_string)
-    local ro = rhs_options:new()
-    return ro:map_cmd(cmd_string)
-end
-
-function map_cu(cmd_string)
-    local ro = rhs_options:new()
-    return ro:map_cu(cmd_string)
-end
-
-function M.load_mapping()
-    local map = mapping:new()
-    map:load_vim_define()
-    map:load_plugin_define()
-    M.nvim_load_mapping(map)
-end
-
-return M
-
