@@ -314,11 +314,17 @@ function M.get_file_type()
 end
 
 function M.filetype_seperator()
-  if not diagnostic.has_diagnostics() and not git.check_workspace() or vim.bo.filetype == "" then
-    u.GalaxyHi("FiletTypeSeperator", 'bg2', 'purple')
+  if vim.bo.filetype == "" then
+    u.GalaxyHi("FiletTypeSeperator", 'act1', 'purple')
+    return ""
+  elseif diagnostic.has_diagnostics() and not git.check_workspace() then
+    u.GalaxyHi("FiletTypeSeperator", 'purple', 'purple')
+    return ""
+  elseif not diagnostic.has_diagnostics() and git.check_workspace() then
+    u.GalaxyHi("FiletTypeSeperator", 'purple', 'purple')
     return ""
   else
-    u.GalaxyHi("FiletTypeSeperator", 'purple', 'bg2')
+    u.GalaxyHi("FiletTypeSeperator", 'purple', 'act1')
     return i.slant.Right
   end
 end

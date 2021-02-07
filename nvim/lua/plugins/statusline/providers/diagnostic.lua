@@ -1,5 +1,6 @@
 local vim, lsp, api = vim, vim.lsp, vim.api
 local i = require("plugins.statusline.icons")
+local u = require("plugins.statusline.utils")
 
 local M = {}
 
@@ -70,6 +71,7 @@ function M.has_diagnostics()
     end
   end
   if c > 0 then
+    --print(c)
     return true
   else
     return false
@@ -77,9 +79,7 @@ function M.has_diagnostics()
 end
 
 function M.end_space()
-  if not M.has_diagnostics() then
-    return ""
-  else
+  if M.has_diagnostics() then
     return " "
   end
   return ""
@@ -87,8 +87,10 @@ end
 
 function M.seperator()
   if not M.has_diagnostics() then
+    u.GalaxyHi("DiagnosticSeperator", 'purple', 'purple')
     return ""
   else
+    u.GalaxyHi("DiagnosticSeperator", 'purple','act1')
     return i.slant.Left
   end
 end

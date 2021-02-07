@@ -18,6 +18,7 @@ end
 
 -- Set map leader (needs to be set before mappings)
 g["mapleader"] = " "
+g["completion_confirm_key"] = ""
 
 -- Check for .env in local and parent recursively
 -- Until after home directory is checked
@@ -83,8 +84,8 @@ opt("o", "fileformats", "unix,mac,dos") -- Use Unix as the standard file type
 opt("o", "magic", true) -- For regular expressions turn magic on
 opt("o", "path", ".,**") -- Directories to search when using gf
 opt("o", "virtualedit", "block") -- Position cursor anywhere in visual block
-opt("o", "synmaxcol", 2500) -- Don't syntax highlight long lines
-opt("o", "formatoptions", "1jtcroq") -- Don't break lines after a one-letter word & Don't auto-wrap text
+opt("b", "synmaxcol", 2500) -- Don't syntax highlight long lines
+opt("b", "formatoptions", "1jtcroq") -- Don't break lines after a one-letter word & Don't auto-wrap text
 opt("o", "lazyredraw", true) -- Don't redraw screen while running macros
 opt("o", "encoding", "utf-8")
 
@@ -127,17 +128,17 @@ opt("o", "history", 2000) -- History saving
 opt("o", "shada", "!,'300,<50,@100,s10,h")
 
 -- Tabs and Indents
-opt("o", "textwidth", 100) -- Text width maximum chars before wrapping
-opt("o", "expandtab", true) -- Expand tabs to spaces.
-opt("o", "tabstop", 4) -- The number of spaces a tab is
-opt("o", "shiftwidth", 4) -- Number of spaces to use in auto(indent)
-opt("o", "softtabstop", -1) -- Number of spaces to use in auto(indent)
+opt("b", "textwidth", 120) -- Text width maximum chars before wrapping
+opt("b", "expandtab", true) -- Expand tabs to spaces.
+opt("b", "tabstop", 4) -- The number of spaces a tab is
+opt("b", "shiftwidth", 4) -- Number of spaces to use in auto(indent)
+opt("b", "softtabstop", 4) -- Number of spaces to use in auto(indent)
 opt("o", "smarttab", true) -- Tab insert blanks according to 'shiftwidth'
-opt("o", "autoindent", true) -- Use same indenting on new lines
+opt("b", "autoindent", true) -- Use same indenting on new lines
 opt("o", "shiftround", false) -- Round indent to multiple of 'shiftwidth'
-opt("o", "cindent", true) -- Increase indent on line after opening brace
+opt("b", "cindent", true) -- Increase indent on line after opening brace
 opt("b", "smartindent", true) -- Insert indents automatically
-opt("o", "breakindentopt", "shift:2,min:20") -- Settingf for breakindent
+opt("w", "breakindentopt", "shift:2,min:20") -- Settingf for breakindent
 
 -- Timing
 opt("o", "timeout", true)
@@ -161,8 +162,8 @@ opt("o", "grepformat", "%f:%l:%c:%m")
 opt("o", "grepprg", "rg --hidden --vimgrep --smart-case --")
 
 -- Behavior
-opt("o", "wrap", false) -- No wrap by default
-opt("o", "linebreak", true) -- Break long lines at 'breakat'
+opt("w", "wrap", true) -- No wrap by default
+opt("w", "linebreak", true) -- Break long lines at 'breakat'
 opt("o", "breakat", [[\ \	;:,!?]]) -- Long lines break chars
 opt("o", "startofline", false) -- Cursor in same column for few commands
 opt("o", "whichwrap", "h,l,<,>,[,],~") -- Move to following line on certain keys
@@ -185,15 +186,15 @@ opt("o", "shortmess", "filnxtToOFc") -- Don't pass messages to |ins-completion-m
 opt("o", "scrolloff", 3) -- Keep at least 3 lines above/below
 opt("o", "sidescrolloff", 5) -- Keep at least 5 lines left/right
 opt("w", "number", true) -- Print line number
-opt("o", "relativenumber", true) -- Show line number relative to current line
+opt("w", "relativenumber", true) -- Show line number relative to current line
 opt("o", "numberwidth", 4) -- The width of the number column
 opt("o", "ruler", false) -- Disable default status ruler
 opt("o", "list", true) -- Show hidden characters
 opt("o", "listchars", "tab:»·,nbsp:+,trail:·,extends:→,precedes:←")
-opt("o", "cursorcolumn", false) -- Highlight the current column
+opt("b", "cursorcolumn", false) -- Highlight the current column
 opt("o", "cursorline", false) -- Highlight the current line
 
-opt("o", "signcolumn", "yes") -- Always show signcolumns
+opt("w", "signcolumn", "yes") -- Always show signcolumns
 opt("o", "laststatus", 2) -- Always show a status line
 --opt('o', 'showtabline', 2)    -- Always show the tabs line
 opt("o", "winwidth", 30)
@@ -206,7 +207,7 @@ opt("o", "showcmd", false) -- Don't show command in status line
 opt("o", "cmdheight", 2) -- Height of the command line
 opt("o", "cmdwinheight", 5) -- Command-line lines
 opt("o", "equalalways", false) -- Don't resize windows on split or close
-opt("o", "colorcolumn", "100") -- Highlight the 100th character limit
+opt("w", "colorcolumn", "100") -- Highlight the 100th character limit
 opt("o", "display", "lastline")
 if env["TERM"] == "linux" then
     opt("o", "termguicolors", false)
@@ -218,62 +219,62 @@ end
 
 opt("o", "pumblend", 10)
 opt("o", "showbreak", "↳  ")
-opt("o", "conceallevel", 2)
-opt("o", "concealcursor", "niv")
+opt("w", "conceallevel", 2)
+opt("w", "concealcursor", "niv")
 
 -- fold
-opt("o", "foldenable", true)
+opt("w", "foldenable", true)
 opt("o", "foldmethod", "indent")
 opt("o", "foldlevelstart", 99)
+-------------------- FOLDTEXT ------------------------------
+function _G.FoldText()
+    local padding = vim.wo.fdc + vim.fn.max({vim.wo.numberwidth, vim.fn.strlen(vim.v.foldstart - vim.fn.line('w0')), vim.fn.strlen(vim.fn.line('w$') - vim.v.foldstart), vim.fn.strlen(vim.v.foldstart)})
+    -- expand tabs
+    local t_start = vim.fn.substitute(vim.fn.getline(vim.v.foldstart), '\t', string.rep(' ', vim.bo.tabstop), 'g')
+    local t_end   = vim.fn.substitute(vim.fn.substitute(vim.fn.getline(vim.v.foldend), '\t', string.rep(' ', vim.bo.tabstop), 'g'), '^\\s*', '', 'g')
+        
+    local info    = ' (' .. (vim.v.foldend - vim.v.foldstart) .. ')'
+    local infolen = vim.fn.strlen(vim.fn.substitute(info, '.', 'x', 'g'))
+    local width   = vim.fn.winwidth(0) - padding - infolen
+
+    local separator    = ' … '
+    local separatorlen = vim.fn.strlen(vim.fn.substitute(separator, '.', 'x', 'g'))
+    local start        = vim.fn.strpart(t_start , 0, width - vim.fn.strlen(vim.fn.substitute(t_end, '.', 'x', 'g')) - separatorlen)
+    local text         = start .. ' … ' .. t_end
+    return text .. string.rep(' ', width - vim.fn.strlen(vim.fn.substitute(text, ".", "x", "g")) - 2) .. info
+end
+
+vim.wo.foldtext="v:lua.FoldText()"
 -------------------- COMMANDS ------------------------------
---  Install all packages
-command(
-    "PaqInstall",
-    "lua require('plug_paq').install()"
-)
-
--- Update all packages 
-command(
-    "PaqClean",
-    "lua require('plug_paq').clean()"
-)
-
--- Remove all packages
-command(
-    "PaqUpdate",
-    "lua require('plug_paq').update()"
-)
-
 -- Get highlight group name and it's
 -- foreground and background color
 command("GetHi", "lua require('utils').GetHi()")
---[[
+
 --- Only install missing plugins
 command(
     "PlugInstall",
-    "execute 'luafile ' . stdpath('config') . '/lua/plug_packer.lua' | packadd packer.nvim | lua require('plug_packer').install()"
+    "execute 'luafile ' . stdpath('config') . '/lua/plug.lua' | packadd packer.nvim | lua require('plug').install()"
 )
 --- Update and install plugins
 command(
     "PlugUpdate",
-    "execute 'luafile ' . stdpath('config') . '/lua/plug_packer.lua' | packadd packer.nvim | lua require('plug_packer').update()"
+    "execute 'luafile ' . stdpath('config') . '/lua/plug.lua' | packadd packer.nvim | lua require('plug').update()"
 )
 --- Remove any disabled or unused plugins
 command(
     "PlugClean",
-    "execute 'luafile ' . stdpath('config') . '/lua/plug_packer.lua' | packadd packer.nvim | lua require('plug_packer').clean()"
+    "execute 'luafile ' . stdpath('config') . '/lua/plug.lua' | packadd packer.nvim | lua require('plug').clean()"
 )
 --- Recompiles lazy loaded plugins
 command(
     "PlugCompile",
-    "execute 'luafile ' . stdpath('config') . '/lua/plug_packer.lua' | packadd packer.nvim | lua require('plug_packer').compile()"
+    "execute 'luafile ' . stdpath('config') . '/lua/plug.lua' | packadd packer.nvim | lua require('plug').compile()"
 )
 --- Performs `PlugClean` and then `PlugUpdate`
 command(
     "PlugSync",
-    "execute 'luafile ' . stdpath('config') . '/lua/plug_packer.lua' | packadd packer.nvim | lua require('plug_packer').sync()"
+    "execute 'luafile ' . stdpath('config') . '/lua/plug.lua' | packadd packer.nvim | lua require('plug').sync()"
 )
---]]
 
 -- Plugins and stuff
 require "autocmd"

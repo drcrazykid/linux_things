@@ -29,26 +29,26 @@ local num = {
 
 function M.get_mode()
     local mode = {
-        c = {i.mode.c, 'plum3'},
-        ce = {i.mode.c, 'plum3'},
-        cv = {i.mode.c, 'plum3'},
-        i = {i.mode.i, 'chartreuse3'},
-        ic = {i.mode.i, 'chartreuse3'},
-        n = {i.mode.n, 'DarkGoldenrod2'},
-        no = {i.mode.n, 'DarkGoldenrod2'},
-        r = {i.mode.r, 'chocolate'},
-        rm = {i.mode.r, 'chocolate'},
-        R = {i.mode.r, 'purple'},
-        Rv = {i.mode.r, 'purple'},
-        s = {i.mode.s, 'SkyBlue2'},
-        S = {i.mode.s, 'SkyBlue2'},
-        t = {i.mode.t, 'gray'},
-        V = {i.mode.v, 'gray'},
-        v = {i.mode.v, 'gray'},
+        c      = {i.mode.c, 'plum3'},
+        ce     = {i.mode.c, 'plum3'},
+        cv     = {i.mode.c, 'plum3'},
+        i      = {i.mode.i, 'chartreuse3'},
+        ic     = {i.mode.i, 'chartreuse3'},
+        n      = {i.mode.n, 'DarkGoldenrod2'},
+        no     = {i.mode.n, 'DarkGoldenrod2'},
+        r      = {i.mode.r, 'chocolate'},
+        rm     = {i.mode.r, 'chocolate'},
+        R      = {i.mode.r, 'purple'},
+        Rv     = {i.mode.r, 'purple'},
+        s      = {i.mode.s, 'SkyBlue2'},
+        S      = {i.mode.s, 'SkyBlue2'},
+        t      = {i.mode.t, 'gray'},
+        V      = {i.mode.v, 'gray'},
+        v      = {i.mode.v, 'gray'},
         ["r?"] = {i.mode.r, 'chocolate'},
-        [""] = {"🅢 ", 'SkyBlue2'},
-        [""] = {" ", 'gray'},
-        ["!"] = {"! ", 'plum3'}
+        [""]  = {"🅢 ", 'SkyBlue2'},
+        [""]  = {" ", 'gray'},
+        ["!"]  = {"! ", 'plum3'}
     }
 
     local n = (function()
@@ -60,35 +60,51 @@ function M.get_mode()
     end)()
 
     local vimMode = mode[vim.fn.mode()]
-    u.GalaxyBG("ViMode", vimMode[2])
-    return vimMode[1] .. " | " .. n .. " "
+    if mode[vim.fn.mode()] ~= nil then
+        u.GalaxyBG("ViMode", vimMode[2])
+        return vimMode[1] .. " | " .. n .. " "
+    else
+        u.GalaxyBG("ViMode", 'error')
+        return " ? | " .. n .. " "
+    end
+
 end
 
 function M.seperator()
     local mode_color = {
-        n = 'DarkGoldenrod2',
-        i = 'chartreuse3',
-        v = 'gray',
-        [""] = 'gray',
-        V = 'gray',
-        c = 'plum3',
-        no = 'DarkGoldenrod2',
-        s = 'SkyBlue2',
-        S = 'SkyBlue2',
-        [""] = 'SkyBlue2',
-        ic = 'chartreuse3',
-        R = 'purple',
-        Rv = 'purple',
-        cv = 'plum3',
-        ce = 'plum3',
-        r = 'chocolate',
-        rm = 'chocolate',
+        c      = 'plum3',
+        ce     = 'plum3',
+        cv     = 'plum3',
+        i      = 'chartreuse3',
+        ic     = 'chartreuse3',
+        n      = 'DarkGoldenrod2',
+        no     = 'DarkGoldenrod2',
+        r      = 'chocolate',
+        rm     = 'chocolate',
+        R      = 'purple',
+        Rv     = 'purple',
+        s      = 'SkyBlue2',
+        S      = 'SkyBlue2',
+        t      = 'gray',
+        V      = 'gray',
+        v      = 'gray',
         ["r?"] = 'chocolate',
-        ["!"] = 'plum3',
-        t = 'plum3'
+        [""]  = 'SkyBlue2',
+        [""]  = 'gray',
+        ["!"]  = 'plum3'
     }
 
-    u.GalaxyFG("ViModeSeperator", mode_color[vim.fn.mode()])
+    local m_color = 'error'
+    if mode_color[vim.fn.mode()] ~= nil then
+        m_color = mode_color[vim.fn.mode()]
+    end
+
+    if not u.buffer_not_empty() or vim.bo.filetype == 'dashboard' then
+        u.GalaxyHi("ViModeSeperator", m_color, 'purple')
+    else
+        u.GalaxyHi("ViModeSeperator", m_color, 'act1')
+    end
+
     return i.slant.Right
 end
 return M

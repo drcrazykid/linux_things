@@ -1,10 +1,4 @@
-packad rust-vim
-lua require 'plugins.tree_sitter'
-
-let g:rustfmt_autosave = 1
-
 set colorcolumn=9999
-setlocal tags=./rusty-tags.vi;/
 
 " Code formatting on save
 augroup rustPreWrite

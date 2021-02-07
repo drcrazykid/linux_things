@@ -8,16 +8,16 @@ _G.MUtils = {}
 
 MUtils.completion_confirm=function()
     if vim.fn.pumvisible() ~= 0  then
-      if vim.fn.complete_info()["selected"] ~= -1 then
-        vim.fn["compe#complete"]("<CR>")
-        return npairs.esc("<c-y>")
-      else
-        vim.fn.nvim_select_popupmenu_item(0 , false , false ,{})
-        vim.fn["compe#complete"]("<CR>")
-        return npairs.esc("<c-n><c-y>")
-      end
+        if vim.fn.complete_info()["selected"] ~= -1 then
+          vim.fn["compe#confirm"]()
+          return npairs.esc("")
+        else
+          vim.fn.nvim_select_popupmenu_item(0, false, false,{})
+          vim.fn["compe#confirm"]()
+          return npairs.esc("<c-n>")
+        end
     else
-      return npairs.check_break_line_char()
+        return npairs.check_break_line_char()
     end
 end
 
@@ -26,7 +26,8 @@ MUtils.tab=function()
         return npairs.esc("<C-n>")
     else
         if vim.fn["vsnip#available"](1) ~= 0 then
-            return fn.feedkeys(string.format('%c%c%c(vsnip-expand-or-jump)', 0x80, 253, 83))
+            vim.fn.feedkeys(string.format('%c%c%c(vsnip-expand-or-jump)', 0x80, 253, 83))
+            return npairs.esc("")
         else
             return npairs.esc("<Tab>")
         end
@@ -38,11 +39,23 @@ MUtils.s_tab=function()
         return npairs.esc("<C-p>")
     else
         if vim.fn["vsnip#jumpable"](-1) ~= 0 then
-            return fn.feedkeys(string.format('%c%c%c(vsnip-jump-prev)', 0x80, 253, 83))
+            vim.fn.feedkeys(string.format('%c%c%c(vsnip-jump-prev)', 0x80, 253, 83))
+            return npairs.esc("")
         else
             return npairs.esc("<C-h>")
         end
     end
+end
+
+function os.capture(cmd, raw)
+    local f = assert(io.popen(cmd, 'r'))
+    local s = assert(f:read('*a'))
+    f:close()
+    if raw then return s end
+    s = string.gsub(s, '^%s+', '')
+    s = string.gsub(s, '%s+$', '')
+    s = string.gsub(s, '[\n\r]+', ' ')
+    return s
 end
 
 local function cnoreabbrev(command)
@@ -77,7 +90,7 @@ cnoreabbrev "W! w!"
 -- Abbrev
 iabbrev "btw by the way"
 iabbrev "atm at the moment"
-imap(";date", "%d %b %Y")
+inoremap(";date", "<C-R>=strftime('%d %b %y')<CR>")
 
 -- Folds
 nnoremap("<CR>", "za")
@@ -152,9 +165,9 @@ nnoremap("<leader>tl", "<C-u>:setlocal nolist!<CR>")
 -- td toggles database
 
 -- Select entire Buffer
-nnoremap("<C-a", "normal maggVG")
+nnoremap("<C-a>", ":normal maggVG<CR>")
 -- Yank entire buffer
-nnoremap("<A-a>", "normal maggyG`a")
+nnoremap("<A-a>", ":normal maggyG`a<CR>")
 
 -- :: Session Management
 nnoremap("<leader>ss", ":SessionSave<CR>")
@@ -180,10 +193,25 @@ imap("<CR>", "v:lua.MUtils.completion_confirm()", {expr = true , noremap = true}
 imap("<Tab>", "v:lua.MUtils.tab()", {expr = true , noremap = true})
 imap("<S-Tab>", "v:lua.MUtils.s_tab()", {expr = true , noremap = true})
 
--- Plugin vim-operator-surround
-nmap("sa", "<Plug>(operator-surround-append)")
-nmap("sd", "<Plug>(operator-surround-delete)")
-nmap("sr", "<Plug>(operator-surround-replace)")
+--- :: Visual mode insert text around visual block
+-- Replace type  with Option<Type>
+vnoremap("<leader>mO", [[:s/\%V\(.*\)\%V/Option<\1>/ <CR> <bar> :nohlsearch<CR>]])
+-- Replace type  with Result<Type, Err>
+vnoremap("<leader>mR", [[:s/\%V\(.*\)\%V/Result<\1, Err>/ <CR> <bar> :nohlsearch<CR>]])
+-- Replace val  with Some(val)
+vnoremap("<leader>ms", [[:s/\%V\(.*\)\%V/Some(\1)/ <CR> <bar> :nohlsearch<CR>]])
+-- Replace val  with Some(val)
+vnoremap("<leader>ms", [[:s/\%V\(.*\)\%V/Some(\1)/ <CR> <bar> :nohlsearch<CR>]])
+-- Replace val  with Ok(val)
+vnoremap("<leader>mo", [[:s/\%V\(.*\)\%V/Ok(\1)/ <CR> <bar> :nohlsearch<CR>]])
+-- Replace val  with Err(val)
+vnoremap("<leader>me", [[:s/\%V\(.*\)\%V/Err(\1)/ <CR> <bar> :nohlsearch<CR>]])
+-- Replace val  with (val)
+vnoremap("<leader>m(", [[:s/\%V\(.*\)\%V/(\1)/ <CR> <bar> :nohlsearch<CR>]])
+-- Replace val  with 'val'
+vnoremap("<leader>m'", [[:s/\%V\(.*\)\%V/'\1'/ <CR> <bar> :nohlsearch<CR>]])
+-- Replace val  with "val"
+vnoremap("<leader>m\"", [[:s/\%V\(.*\)\%V/"\1"/ <CR> <bar> :nohlsearch<CR>]])
 
 -- File Tree (nvim-tree.lua)
 nnoremap("<leader>tf", "<C-u>:NvimTreeToggle<CR>")
@@ -194,8 +222,32 @@ nnoremap("<leader>tf", "<C-u>:NvimTreeToggle<CR>")
 nnoremap("<leader>tv", "<cmd>Vista!!<CR>")
 
 -- Vim Easy Align
-nmap("<leader>a", "<Plug>(EasyAlign)")
-vmap("<leader>a", "<Plug>(EasyAlign)")
+nmap("<leader>aa", [[:'<,'>EasyAlign /[+;]\+/]])
+vmap("<leader>aa", [[:'<,'>EasyAlign /[+;]\+/]])
+nmap("<leader>aA", ":'<,'>EasyAlign*&")
+vmap("<leader>aA", ":'<,'>EasyAlign*&")
+nmap("<leader>ac", ":'<,'>EasyAlign*:")
+vmap("<leader>ac", ":'<,'>EasyAlign*:")
+nmap("<leader>aC", ":'<,'>EasyAlign*,")
+vmap("<leader>aC", ":'<,'>EasyAlign*,")
+nmap("<leader>ad", [[:'<,'>EasyAlign /[\;]\+/]])
+vmap("<leader>ad", [[:'<,'>EasyAlign /[\;]\+/]])
+nmap("<leader>ae", ":'<,'>EasyAlign*=")
+vmap("<leader>ae", ":'<,'>EasyAlign*=")
+nmap("<leader>ah", ":'<,'>EasyAlign*#")
+vmap("<leader>ah", ":'<,'>EasyAlign*#")
+nmap("<leader>ai", "<Plug>(EasyAlign)")
+vmap("<leader>ai", "<Plug>(EasyAlign)")
+nmap("<leader>am", [[:'<,'>EasyAlign /[*;]\+/]])
+vmap("<leader>am", [[:'<,'>EasyAlign /[*;]\+/]])
+nmap("<leader>ap", ":'<,'>EasyAlign*.")
+vmap("<leader>ap", ":'<,'>EasyAlign*.")
+nmap("<leader>aq", ":'<,'>EasyAlign*\"")
+vmap("<leader>aq", ":'<,'>EasyAlign*=\"")
+nmap("<leader>as", [[:'<,'>EasyAlign /[-;]\+/]])
+vmap("<leader>as", [[:'<,'>EasyAlign /[-;]\+/]])
+nmap("<leader>aS", ":'<,'>EasyAlign*;")
+vmap("<leader>aS", ":'<,'>EasyAlign*;")
 
 -- Plugin DadbodUI
 nnoremap("<leader>td", ":DBUIToggle<CR>")
@@ -211,3 +263,28 @@ nnoremap("<Leader>fw", "<C-u>:DashboardFindWord<CR>")
 nnoremap("<Leader>fb", "<C-u>:DashboardJumpMark<CR>")
 nnoremap("<Leader>ff", "<C-u>:DashboardFindFile<CR>")
 nnoremap("<Leader>fh", "<C-u>:DashboardFindHistory<CR>")
+
+
+local name = os.capture('git config --list | grep "user.name" | cut -d "=" -f2')
+if name ~= nil then
+    inoremap(';name', name)
+
+    words = {}
+    for word in string.gmatch(name, "[^%s]+") do
+        table.insert(words, word)
+     end
+
+     if table.getn(words) == 2 then
+        inoremap(';fn', words[1])
+        inoremap(';ln', words[2])
+     elseif table.getn(words) >= 3 then
+        inoremap(';fn', words[1])
+        inoremap(';mn', words[2])
+        inoremap(';ln', words[3])
+    end
+end
+
+local email = os.capture('git config --list | grep "user.email" | cut -d "=" -f2')
+if email ~= nil then
+    inoremap(';email', email)
+end

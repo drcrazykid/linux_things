@@ -13,5 +13,3 @@ function! RunMyCode()
         echo 'Java is not installed!'
     endif
 endfunction
-
-lua require 'plugins.tree_sitter'

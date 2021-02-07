@@ -57,7 +57,7 @@ let g:dashboard_custom_section={
         \ 'command':function('dashboard#handler#book_marks')},
     \ 'update_plugins'   :{
         \ 'description': ['   Update Plugins                                     '],
-        \ 'command': 'lua require("plug_paq").update()'},
+        \ 'command': "execute 'luafile ' . stdpath('config') . '/lua/plug.lua' | packadd packer.nvim | lua require('plug').update()"},
     \ }
 
 let quote = systemlist("~/.local/share/nvim/bin/pq")

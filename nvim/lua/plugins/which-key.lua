@@ -1,6 +1,22 @@
 -- Vim-Which-Key
 vim.g.which_key_sep = ''
 vim.g.which_key_map = {
+      a = {
+        name = "Align",
+        a = "by Addition operator",
+        A = "by Ampersamp operator",
+        c = "by Colon",
+        C = "by Comma",
+        d = "by Division operator",
+        e = "by Equal operator",
+        h = "by Hashtag",
+        i = "Interactive",
+        m = "by Mutliplication operator",
+        p = "by Period",
+        q = "by Double Quotes",
+        s = "by Subtraction operator",
+        S = "by Semicolon",
+    },
     b = {
         name = "Buffer",
         d = "Order by directory",
@@ -99,11 +115,6 @@ function WhichKeyCodeTest()
     key_maps.c.r = 'Run'
     key_maps.c.t = 'Test'
 
-    -- Remove keys from Which-Key keymap
-    if key_maps.l ~=nil then
-		  key_maps.l = nil
-    end
-
     -- Update Which-Key keymap
     vim.g.which_key_map = key_maps
 end
@@ -123,9 +134,6 @@ function WhichKeyCodeCompileRun()
     -- Remove keys from Which-Key keymap
     if key_maps.c.t ~=nil then
 		  key_maps.c.t = nil
-    end
-    if key_maps.l ~=nil then
-		  key_maps.l = nil
     end
 
     -- Update Which-Key keymap
@@ -148,9 +156,6 @@ function WhichKeyCodeCompile()
     end
     if key_maps.c.t ~=nil then
 		  key_maps.c.t = nil
-    end
-    if key_maps.l ~=nil then
-	  	key_maps.l = nil
     end
 
     -- Update Which-Key keymap
@@ -179,35 +184,7 @@ function WhichKeyCodeRun()
     vim.g.which_key_map = key_maps
 end
 
-function WhichKeyProseRun()
-    -- Set key mappings 
-    code_map("r", "Run")
-
-    -- Get Which-Key keymap
-    key_maps = vim.g.which_key_map
-
-    -- Add keys to Which-Key keymap
-    key_maps.c.r = 'Run'
-    key_maps.l = {
-        name = "Lexical",
-        b = "Dictionary",
-        c = "Thesaurus",
-    }
-
-    -- Remove keys from Which-Key keymap
-    if key_maps.c.c ~=nil then
-		  key_maps.c.c = nil
-    end
-    if key_maps.c.t ~=nil then
-		  key_maps.c.t = nil
-    end
-    
-    -- Update Which-Key keymap
-    vim.g.which_key_map = key_maps
-end
-
 function WhichKeyProse()
-
     -- Get Which-Key keymap
     key_maps = vim.g.which_key_map
 
@@ -218,35 +195,34 @@ function WhichKeyProse()
         c = "Thesaurus",
     }
 
-    -- Remove keys from Which-Key keymap
-    if key_maps.c.c ~=nil then
-		  key_maps.c.c = nil
-    end
-    if key_maps.c.r ~=nil then
-		  key_maps.c.r = nil
-    end
-    if key_maps.c.t ~=nil then
-		  key_maps.c.t = nil
-    end
-
     -- Update Which-Key keymap
     vim.g.which_key_map = key_maps
 end
 
-function WhichKeyCodeNone()
+function WhichKeyNoCode()
+  -- Get Which-Key keymap
+  key_maps = vim.g.which_key_map
+
+  -- Remove keys from Which-Key keymap
+  if key_maps.c.c ~=nil then
+    key_maps.c.c = nil
+  end
+  if key_maps.c.r ~=nil then
+    key_maps.c.r = nil
+  end
+  if key_maps.c.t ~=nil then
+    key_maps.c.t = nil
+  end
+  
+  -- Update Which-Key keymap
+  vim.g.which_key_map = key_maps
+end
+
+function WhichKeyNoProse()
     -- Get Which-Key keymap
     key_maps = vim.g.which_key_map
 
     -- Remove keys from Which-Key keymap
-    if key_maps.c.c ~=nil then
-		  key_maps.c.c = nil
-    end
-    if key_maps.c.r ~=nil then
-		  key_maps.c.r = nil
-    end
-    if key_maps.c.t ~=nil then
-		  key_maps.c.t = nil
-    end
     if key_maps.l ~=nil then
 	  	key_maps.l = nil
     end
@@ -286,12 +262,13 @@ WhichKey.SetKeyOnFT=function()
     elseif compile == true then
       WhichKeyCodeCompile()
     elseif run == true then
-      if isProse == true then
-        WhichKeyProseRun()
-      else
-        WhichKeyCodeRun()
-      end
-    elseif isProse == true then
-      WhichKeyProse()
+      WhichKeyCodeRun()
+    else
+      WhichKeyNoCode()
+    end
+    if isProse == true then
+      WhichKeyProseRun()
+    else
+      WhichKeyNoProse()
     end
 end
