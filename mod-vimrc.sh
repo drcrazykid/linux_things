@@ -33,21 +33,22 @@
 ###############
 
 # Enables line numbers with 'Ctrl + N' in normal mode
+FILE="/home/$(whoami)/.vimrc"
+
 function updateVimRC(){
-	echo "nmap <C-n> :set invnumber<CR>" >> ~/.vimrc
-	echo "map <F2> i#!/bin/bash" >> ~/.vimrc 
-	echo "map <F3> i#!/usr/bin/python3" >> ~/.vimrc
-	echo "map <F4> o#This file was created on <ESC>:r!date '+\%d \%b \%y'<ESC>kJ" >> ~/.vimrc
+	echo "nmap <C-n> :set invnumber<CR>" >> $FILE
+	echo "map <F2> i#!/bin/bash" >> $FILE 
+	echo "map <F3> i#!/usr/bin/python3" >> $FILE
+	echo "map <F4> o#This file was created on <ESC>:r!date '+\%d \%b \%y'<ESC>kJ" >> $FILE
 
-	echo "syntax on" >> ~/.vimrc
+	echo "syntax on" >> $FILE
 }
-
-FILE="~/.vimrc"
 
 if [[ -f $FILE ]]; then
 	echo "$FILE exists..."
 	updateVimRC
 else
+	echo "Creating an empty file..."
 	touch $FILE
 	updateVimRC
 fi
